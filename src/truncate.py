@@ -39,7 +39,7 @@ def truncate(provided_actions: list[str], all_actions: list[str]):
     return truncated_list
 
 
-def optimize_overlaps(truncated_actions: list[str], all_actions: list[str]) -> list[str]:
+def merge_overlaps(truncated_actions: list[str], all_actions: list[str]) -> list[str]:
     truncated_trie = Trie.from_list(truncated_actions)
     base_trie = Trie.from_list(all_actions)
 
@@ -49,41 +49,42 @@ def optimize_overlaps(truncated_actions: list[str], all_actions: list[str]) -> l
         truncated_node: TrieNode = truncated_trie.root
         base_node: TrieNode = base_trie.root
 
-        prefix = ""
+        # Length of the service prefix (e.g., 'lambda:'), including the colon
+        service_prefix_len = len(action.split(":")[0]) + 1
+        action_prefix = ""
 
-        for pos, char in enumerate(action):
+        for index, char in enumerate(action):
             # If the character is a star (wildcard), it means we're at the end of the string and
             # there's nothing to optimize
             if char == "*":
                 break
 
-            print(f"At char {char} at poisition {pos}")
+            print(f"Position {index} with char {char}")
 
             truncated_node: TrieNode = truncated_node.children[char]
             base_node: TrieNode = base_node.children[char]
 
-            prefix += char
+            action_prefix += char
 
             # If the occurences of a character in the truncated trie is 1, it means that there are
             # no other IAM actions with the same prefix, therefore, there's nothing to optimize.
             if truncated_node.occurences == 1:
-                print("Breaking at #1")
+                print("Break 1")
                 optimized_actions.append(action)
                 break
 
             # If the occurences of a character in both tries are equal, it means there are no
             # other unintended IAM actions in the list of `all_actions` with the same prefix. In
             # such case, we can further truncate the prefix at the current position.
-            if truncated_node.occurences == base_node.occurences:
-                print("Breaking at #2")
-                optimized_actions.append(prefix + "*")
+            if index >= service_prefix_len and truncated_node.occurences == base_node.occurences:
+                print(f"Break 2: Position {index} at char {char}")
+                optimized_actions.append(action_prefix + "*")
                 break
 
-            # If none of the above applies, return the original string
-            # optimized_actions.append(action)
+    # Remove duplicates from the list
+    optimized_actions = list(set(optimized_actions))
 
     # Sort the list for predictable results
     optimized_actions.sort()
-    print(optimized_actions)
 
-    return list(set(optimized_actions))
+    return optimized_actions

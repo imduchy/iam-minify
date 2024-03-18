@@ -1,6 +1,6 @@
 from src.actions import IAMActions
 
-from src.truncate import optimize_overlaps, truncate
+from src.truncate import merge_overlaps, truncate
 
 if __name__ == "__main__":
     all_actions = IAMActions()
@@ -91,7 +91,7 @@ if __name__ == "__main__":
         all_actions=all_actions.as_list,
     )
 
-    optimized_list = optimize_overlaps(
+    optimized_list = merge_overlaps(
         truncated_actions=truncated_permissions,
         all_actions=all_actions.as_list,
     )
