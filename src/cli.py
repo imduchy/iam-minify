@@ -34,15 +34,11 @@ def main():
     # Fetch the list of all IAM actions
     all_actions = IAMActions()
 
-    original_length = json.dumps(provided_actions)
-    print(f"Original length: {len(original_length)}")
-
     truncated_permissions = truncate(provided_actions, all_actions.as_list)
     optimized_list = merge_overlaps(truncated_permissions, all_actions.as_list)
-    
-    optimized_length = json.dumps(optimized_list)
-    print(f"Optimized length: {len(optimized_length)}")
+
     print(json.dumps(optimized_list, indent=2))
+
 
 if __name__ == "__main__":
     main()
