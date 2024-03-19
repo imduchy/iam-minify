@@ -1,6 +1,6 @@
 import pytest
 
-from src._internal.truncate import truncate, merge_overlaps
+from src.truncate import truncate, merge_overlaps
 
 
 class TestTruncateMethod:

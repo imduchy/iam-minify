@@ -1,4 +1,4 @@
-from src._internal.trie import Trie, TrieNode
+from src.trie import Trie, TrieNode
 
 
 def truncate(provided_actions: list[str], all_actions: list[str]):

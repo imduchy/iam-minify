@@ -1,6 +1,10 @@
-import requests
 import json
+import logging
+from functools import cache
 
+import requests
+
+LOGGER = logging.getLogger("iam-minify")
 FILE_URL = "https://awspolicygen.s3.amazonaws.com/js/policies.js"
 
 
@@ -12,13 +16,15 @@ class IAMActions:
     @property
     def as_dict(self):
         return self._iam_actions
-    
+
     @property
     def as_list(self):
         return [action for actions in self._iam_actions.values() for action in actions]
 
+    @cache
     def _fetch_and_parse(self) -> str:
         try:
+            LOGGER.debug("Fetching IAM actions from %s", FILE_URL)
             response = requests.get(FILE_URL, timeout=5)
 
             return self._parse_data(response.text)
