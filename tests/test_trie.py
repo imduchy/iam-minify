@@ -1,4 +1,4 @@
-from src.trie import Trie
+from src._internal.trie import Trie
 
 
 class TestTrie:

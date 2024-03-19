@@ -1,4 +1,4 @@
-from src.trie import Trie, TrieNode
+from src._internal.trie import Trie, TrieNode
 
 
 def truncate(provided_actions: list[str], all_actions: list[str]):
@@ -59,8 +59,6 @@ def merge_overlaps(truncated_actions: list[str], all_actions: list[str]) -> list
             if char == "*":
                 break
 
-            print(f"Position {index} with char {char}")
-
             truncated_node: TrieNode = truncated_node.children[char]
             base_node: TrieNode = base_node.children[char]
 
@@ -69,7 +67,6 @@ def merge_overlaps(truncated_actions: list[str], all_actions: list[str]) -> list
             # If the occurences of a character in the truncated trie is 1, it means that there are
             # no other IAM actions with the same prefix, therefore, there's nothing to optimize.
             if truncated_node.occurences == 1:
-                print("Break 1")
                 optimized_actions.append(action)
                 break
 
@@ -77,7 +74,6 @@ def merge_overlaps(truncated_actions: list[str], all_actions: list[str]) -> list
             # other unintended IAM actions in the list of `all_actions` with the same prefix. In
             # such case, we can further truncate the prefix at the current position.
             if index >= service_prefix_len and truncated_node.occurences == base_node.occurences:
-                print(f"Break 2: Position {index} at char {char}")
                 optimized_actions.append(action_prefix + "*")
                 break
 

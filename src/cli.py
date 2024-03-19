@@ -1,9 +1,9 @@
+import argparse
 import json
 import sys
-import argparse
 
-from src.actions import IAMActions
-from src.truncate import merge_overlaps, truncate
+from src._internal.actions import IAMActions
+from src._internal.truncate import merge_overlaps, truncate
 
 arg_parser = argparse.ArgumentParser("iamtrunc")
 arg_parser.add_argument(
@@ -13,7 +13,8 @@ arg_parser.add_argument(
     required=True,
 )
 
-if __name__ == "__main__":
+
+def main():
     args = arg_parser.parse_args()
 
     try:
@@ -23,7 +24,7 @@ if __name__ == "__main__":
         with open(file_path, "r", encoding="utf-8") as f:
             provided_actions = json.load(f)
 
-    except FileNotFoundError as err:
+    except FileNotFoundError:
         print(
             "Error: The file doesn't exist. Provide a valid path to a JSON file containing a list "
             "of valid IAM actions."
@@ -33,7 +34,15 @@ if __name__ == "__main__":
     # Fetch the list of all IAM actions
     all_actions = IAMActions()
 
+    original_length = json.dumps(provided_actions)
+    print(f"Original length: {len(original_length)}")
+
     truncated_permissions = truncate(provided_actions, all_actions.as_list)
     optimized_list = merge_overlaps(truncated_permissions, all_actions.as_list)
-
+    
+    optimized_length = json.dumps(optimized_list)
+    print(f"Optimized length: {len(optimized_length)}")
     print(json.dumps(optimized_list, indent=2))
+
+if __name__ == "__main__":
+    main()
