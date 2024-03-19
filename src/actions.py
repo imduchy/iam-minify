@@ -1,6 +1,5 @@
 import json
 import logging
-from functools import cache
 
 import requests
 
@@ -21,7 +20,6 @@ class IAMActions:
     def as_list(self):
         return [action for actions in self._iam_actions.values() for action in actions]
 
-    @cache
     def _fetch_and_parse(self) -> str:
         try:
             LOGGER.debug("Fetching IAM actions from %s", FILE_URL)
