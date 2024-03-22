@@ -105,3 +105,30 @@ class TestMergeOverlapsMethod:
         )
 
         assert res == ["lambda:C*", "lambda:D*", "lambda:G*"]
+
+    def test_return_action_without_wildcard_if_cant_be_merged(self):
+        res = merge_overlaps(
+            truncated_actions=["s3:ListBucket", "s3:ListBucketV*"],
+            all_actions=[
+                "s3:ListAllMyBuckets",
+                "s3:ListBucket",
+                "s3:ListBucketMultipartUploads",
+                "s3:ListBucketVersions",
+                "s3:ListJobs",
+            ],
+        )
+
+        assert res == ["s3:ListBucket", "s3:ListBucketV*"]
+
+    def test_return_single_action_without_wildcard(self):
+        res = merge_overlaps(
+            truncated_actions=["s3:ListBucket"],
+            all_actions=[
+                "s3:ListAllMyBuckets",
+                "s3:ListBucket",
+                "s3:ListBucketVersions",
+                "s3:ListJobs",
+            ],
+        )
+
+        assert res == ["s3:ListBucket"]

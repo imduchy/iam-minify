@@ -49,8 +49,9 @@ def merge_overlaps(truncated_actions: list[str], all_actions: list[str]) -> list
         truncated_node: TrieNode = truncated_trie.root
         base_node: TrieNode = base_trie.root
 
+        service_prefix = action.split(":")[0]
         # Length of the service prefix (e.g., 'lambda:'), including the colon
-        service_prefix_len = len(action.split(":")[0]) + 1
+        service_prefix_len = len(service_prefix) + 1
         action_prefix = ""
 
         for index, char in enumerate(action):
@@ -64,8 +65,14 @@ def merge_overlaps(truncated_actions: list[str], all_actions: list[str]) -> list
 
             action_prefix += char
 
+            # If the current prefix equals to the truncated action, we can break from the
+            # loop and return the value without the wildcard at the end.
+            if action_prefix == action and truncated_node.occurences < base_node.occurences:
+                optimized_actions.append(action)
+                break
+
             # If the occurences of a character in the truncated trie is 1, it means that there are
-            # no other IAM actions with the same prefix, therefore, there's nothing to optimize.
+            # no other truncated actions with the same prefix, therefore, there's nothing to merge.
             if truncated_node.occurences == 1:
                 optimized_actions.append(action)
                 break
