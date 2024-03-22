@@ -16,14 +16,16 @@ python -m pip install iam-minify
 
 ## Usage & features
 
-- `iam-minify -f path/to/policy.json` 
+- `iam-minify iam-policy.json` 
 
 The script will traverse though all policy statemends defined in the policy document, and optimise IAM actions within the same statement. It processes different policy statements in isolation in order to not grant unintended access to resources.
+
+### Example
 
 Consider the following IAM policy:
 
 ```json
-// ./myPolicy.json
+// ./iam-policy.json
 
 {
   "Version": "2012-10-17",
@@ -31,16 +33,16 @@ Consider the following IAM policy:
     {
       "Effect": "Allow",
       "Action": [
-        "s3:ListBucket",
-        "s3:ListStorageLensConfigurations",
+        "s3:ListAccessPoints",
+        "s3:ListAccessPointsForObjectLambda",
         "s3:ListAllMyBuckets",
+        "s3:ListBucket",
         "s3:ListBucketMultipartUploads",
+        "s3:ListBucketVersions",
         "s3:ListJobs",
         "s3:ListMultipartUploadParts",
-        "s3:ListBucketVersions",
-        "s3:ListAccessPointsForObjectLambda",
-        "s3:ListAccessPoints",
         "s3:ListMultiRegionAccessPoints"
+        "s3:ListStorageLensConfigurations",
       ],
       "Resource": "*"
     }
@@ -48,11 +50,7 @@ Consider the following IAM policy:
 }
 ```
 
-```bash
-iam-minify -f myPolicy.json
-```
-
-Will output the following result:
+Executing `iam-minify myPolicy.json` will output the following result:
 
 ```json
 {

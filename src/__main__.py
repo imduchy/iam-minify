@@ -16,9 +16,9 @@ def main() -> int:
 
     try:
         # Get the path to the file containing IAM actions
-        file_path = config.file_path
+        policy_document_path = config.policy_document_path
 
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(policy_document_path, "r", encoding="utf-8") as f:
             policy_document = json.load(f)
 
     except FileNotFoundError:
