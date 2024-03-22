@@ -19,7 +19,7 @@ def main() -> int:
         file_path = config.file_path
 
         with open(file_path, "r", encoding="utf-8") as f:
-            provided_actions = json.load(f)
+            policy_document = json.load(f)
 
     except FileNotFoundError:
         LOGGER.error(
@@ -31,10 +31,16 @@ def main() -> int:
     # Fetch the list of all IAM actions
     all_actions = IAMActions()
 
-    truncated_permissions = truncate(provided_actions, all_actions.as_list)
-    optimized_list = merge_overlaps(truncated_permissions, all_actions.as_list)
+    for statement in policy_document["Statement"]:
+        actions = statement["Action"]
 
-    LOGGER.info(json.dumps(optimized_list, indent=2))
+        truncated = truncate(actions, all_actions.as_list)
+        merged = merge_overlaps(truncated, all_actions.as_list)
+
+        # Overwrite the original list of actions within the statement
+        statement["Action"] = merged
+
+    LOGGER.info(json.dumps(policy_document, indent=2))
 
     return 0
 
