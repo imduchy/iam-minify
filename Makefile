@@ -4,7 +4,10 @@ build:
 	pipenv run python -m build
 
 install-pkg:
-	pipenv run python -m pip install dist/iam_minify-0.0.1-py3-none-any.whl --force-reinstall
+	pipenv run python -m pip install dist/iam_minify-0.0.2-py3-none-any.whl --force-reinstall
+
+test:
+	pipenv run python -m pytest tests/*
 
 publish:
 	make build
