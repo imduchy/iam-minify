@@ -9,7 +9,7 @@ permissions:
   id-token: write  # IMPORTANT: this permission is mandatory for PyPi OIDC
 
 jobs:
-  deploy:
+  publish:
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -31,5 +31,4 @@ jobs:
       run: make build
 
     - name: Publish package
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@release/v1
