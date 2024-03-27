@@ -1,0 +1,30 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:ListStorageLensConfigurations",
+        "s3:ListAllMyBuckets",
+        "s3:ListBucketMultipartUploads",
+        "s3:ListJobs",
+        "s3:ListMultipartUploadParts",
+        "s3:ListBucketVersions",
+        "s3:ListAccessPointsForObjectLambda",
+        "s3:ListAccessPoints",
+        "s3:ListMultiRegionAccessPoints"
+      ],
+      "Resource": "arn:aws:s3:::myfirstbucket"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:ListAllMyBuckets",
+        "s3:ListBucketVersions"
+      ],
+      "Resource": "arn:aws:s3:::mysecondbucket"
+    }
+  ]
+}
