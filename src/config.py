@@ -33,6 +33,9 @@ class ArgumentParser:
         self._add_arguments()
 
     def parse_args(self) -> Namespace:
+        """
+        Parses and returns CLI arguments
+        """
         return self._arg_parser.parse_args()
 
     def _add_arguments(self):

@@ -1,41 +1,36 @@
+"""
+Optimize long AWS IAM policies by strategically using wildcards, reducing the number of characters,
+and maintaining the intended scope of permissions.
+"""
+
 import json
 import logging
 import sys
 
+from src.service_actions import AWSServiceActions
 from src.config import ArgumentParser, Config
-from src.actions import IAMActions
-from src.truncate import merge_overlaps, truncate
+from src.file_helpers import load_policy_document
+from src.optimize import merge_overlaps, truncate
 
 LOGGER = logging.getLogger("iam-minify")
 
 
 def main() -> int:
     cli_args = ArgumentParser().parse_args()
-
     config = Config(cli_args)
 
-    try:
-        # Get the path to the file containing IAM actions
-        policy_document_path = config.policy_document_path
+    # Load JSON file containing IAM policy document
+    policy_document = load_policy_document(config.policy_document_path)
 
-        with open(policy_document_path, "r", encoding="utf-8") as f:
-            policy_document = json.load(f)
+    # Fetch actions for all available AWS services
+    service_actions = AWSServiceActions()
 
-    except FileNotFoundError:
-        LOGGER.error(
-            "The file doesn't exist. Provide a valid path to a JSON file containing a list of "
-            "valid IAM actions."
-        )
-        return 1
-
-    # Fetch the list of all IAM actions
-    all_actions = IAMActions()
-
+    # Process each of the policy statements separately
     for statement in policy_document["Statement"]:
-        actions = statement["Action"]
+        policy_actions = statement["Action"]
 
-        truncated = truncate(actions, all_actions.as_list)
-        merged = merge_overlaps(truncated, all_actions.as_list)
+        truncated = truncate(policy_actions, service_actions.as_list)
+        merged = merge_overlaps(truncated, service_actions.as_list)
 
         # Overwrite the original list of actions within the statement
         statement["Action"] = merged
@@ -46,4 +41,10 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+
+    # pylint: disable=W0718
+    except Exception as err:
+        LOGGER.error(err)
+        sys.exit(1)
