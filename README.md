@@ -2,7 +2,7 @@
 
 Optimize long AWS IAM policies by strategically using wildcards, reducing the number of characters, and maintaining the intended scope of permissions.
 
-## Background & Rationale
+## Background
 
 When crafting long and complex AWS IAM customer-managed policies, the 6,144 character limit imposed by AWS can become a problem. While one approach to address this limitation is to split a long policy into multiple customer-managed policies, this may not always be the ideal solution. In such scenarios, it's possible to reduce the length of a policy by strategically using wildcards where possible.
 
@@ -16,7 +16,7 @@ python -m pip install iam-minify
 
 ## Usage & features
 
-- `iam-minify iam-policy.json` 
+- `iam-minify example-policy.json` 
 
 The script will traverse though all policy statemends defined in the policy document, and optimise IAM actions within the same statement. It processes different policy statements in isolation in order to not grant unintended access to resources.
 
@@ -25,7 +25,7 @@ The script will traverse though all policy statemends defined in the policy docu
 Consider the following IAM policy:
 
 ```json
-// ./iam-policy.json
+// ./example-policy.json
 
 {
   "Version": "2012-10-17",
@@ -50,7 +50,7 @@ Consider the following IAM policy:
 }
 ```
 
-Executing `iam-minify myPolicy.json` will output the following result:
+Executing `iam-minify example-policy.json` will output the following result:
 
 ```json
 {
