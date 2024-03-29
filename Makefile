@@ -8,7 +8,3 @@ install-pkg:
 
 test:
 	pipenv run python -m pytest tests/*
-
-publish:
-	make build
-	twine upload dist/*
