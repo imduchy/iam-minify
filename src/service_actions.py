@@ -56,7 +56,7 @@ class AWSServiceActions:
         service_map: dict = resp_json["serviceMap"]
 
         for service in service_map.values():
-            prefix = service["StringPrefix"]
-            actions = service["Actions"]
+            prefix: str = service["StringPrefix"]
+            actions: list[str] = service["Actions"]
 
             self._iam_actions[prefix] = [f"{prefix}:{action}" for action in actions]

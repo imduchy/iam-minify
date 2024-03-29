@@ -1,15 +1,15 @@
 import pytest
 
-from src.optimize import truncate, merge_overlaps
+from src.optimize import NonExistentActionError, UnsupportedWildcardError, truncate, merge_overlaps
 
 
 class TestTruncateMethod:
     def test_raises_error_when_all_actions_are_empty(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(NonExistentActionError):
             truncate(all_actions=[], provided_actions=["lambda:CreateFunction"])
 
     def test_raises_error_when_trie_doesnt_contain_char(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(NonExistentActionError):
             truncate(
                 all_actions=["lambda:CreateFunction"], provided_actions=["lambda:DestroyFunction"]
             )
@@ -27,6 +27,16 @@ class TestTruncateMethod:
 
         assert res == ["lambda:CreateFunction"]
 
+    def test_returns_action_with_wildcard_after_first_char_if_provided_actions_match_all_actions(
+        self,
+    ):
+        res = truncate(
+            all_actions=["rds-db:connect", "neptune-db:connect"],
+            provided_actions=["rds-db:connect", "neptune-db:connect"],
+        )
+
+        assert res == ["rds-db:c*", "neptune-db:c*"]
+
     def test_returns_action_with_wildcard_if_node_ocurrence_is_one(self):
         res = truncate(
             all_actions=["lambda:CreateFunction", "lambda:CreateFunctionVersion"],
@@ -34,6 +44,21 @@ class TestTruncateMethod:
         )
 
         assert res == ["lambda:CreateFunctionV*"]
+
+    def test_raises_error_for_wildcard_in_the_middle_of_string(self):
+        with pytest.raises(UnsupportedWildcardError):
+            truncate(
+                all_actions=["lambda:CreateFunction", "lambda:CreateFunctionVersion"],
+                provided_actions=["lambda:*Function*"],
+            )
+
+    def test_returns_action_for_wildcard_at_the_end_of_string(self):
+        res = truncate(
+            all_actions=["lambda:CreateFunction", "lambda:CreateFunctionVersion"],
+            provided_actions=["lambda:CreateFunction*"],
+        )
+
+        assert res == ["lambda:CreateFunction*"]
 
 
 class TestMergeOverlapsMethod:
@@ -98,13 +123,10 @@ class TestMergeOverlapsMethod:
                 "lambda:DeleteF*",
                 "lambda:CreateF*",
                 "lambda:GetF*",
-                "lambda:DeleteA*",
-                "lambda:GetA*",
-                "lambda:CreateA*",
             ],
         )
 
-        assert res == ["lambda:C*", "lambda:D*", "lambda:G*"]
+        assert res == ["lambda:CreateF*", "lambda:DeleteF*", "lambda:GetF*"]
 
     def test_return_action_without_wildcard_if_cant_be_merged(self):
         res = merge_overlaps(
@@ -132,3 +154,19 @@ class TestMergeOverlapsMethod:
         )
 
         assert res == ["s3:ListBucket"]
+
+    def test_return_wildcard_after_service_prefix(self):
+        res = merge_overlaps(
+            all_actions=["rds-db:connect", "neptune-db:connect"],
+            truncated_actions=["rds-db:c*", "neptune-db:c*"],
+        )
+
+        assert res == ["neptune-db:*", "rds-db:*"]
+
+    def test_return_wildcard_after_service_prefix_if_all_service_actions_are_defined(self):
+        res = merge_overlaps(
+            all_actions=["lambda:CreateFunction", "lambda:DeleteFunction", "lambda:GetFunction"],
+            truncated_actions=["lambda:C*", "lambda:G*", "lambda:D*"],
+        )
+
+        assert res == ["lambda:*"]

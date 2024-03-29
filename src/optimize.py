@@ -59,7 +59,7 @@ def truncate(provided_actions: list[str], all_actions: list[str]):
             # If the occurences of the character in the trie is 1, it means that there are no other
             # IAM actions with the same prefix, so we can break from the loop and return the value
             # with the wildcard at the end.
-            if pos > len(service_prefix) + 1 and node.occurences == 1:
+            if pos > len(service_prefix) and node.occurences == 1:
                 truncated_list.append(action_prefix + "*")
                 break
 
@@ -77,8 +77,6 @@ def merge_overlaps(truncated_actions: list[str], all_actions: list[str]) -> list
         base_node: TrieNode = base_trie.root
 
         service_prefix = action.split(":")[0]
-        # Length of the service prefix (e.g., 'lambda:'), including the colon
-        service_prefix_len = len(service_prefix) + 1
         action_prefix = ""
 
         for index, char in enumerate(action):
@@ -90,7 +88,11 @@ def merge_overlaps(truncated_actions: list[str], all_actions: list[str]) -> list
             truncated_node: TrieNode = truncated_node.children[char]
             base_node: TrieNode = base_node.children[char]
 
-            action_prefix += char
+            action_prefix = action_prefix + char
+
+            # There's nothing to optimze at the service prefix, so continue until we get past that
+            if index <= len(service_prefix) - 1:
+                continue
 
             # If the current prefix equals to the truncated action, we can break from the
             # loop and return the value without the wildcard at the end.
@@ -98,16 +100,10 @@ def merge_overlaps(truncated_actions: list[str], all_actions: list[str]) -> list
                 optimized_actions.append(action)
                 break
 
-            # If the occurences of a character in the truncated trie is 1, it means that there are
-            # no other truncated actions with the same prefix, therefore, there's nothing to merge.
-            if truncated_node.occurences == 1:
-                optimized_actions.append(action)
-                break
-
             # If the occurences of a character in both tries are equal, it means there are no
             # other unintended IAM actions in the list of `all_actions` with the same prefix. In
             # such case, we can further truncate the prefix at the current position.
-            if index >= service_prefix_len and truncated_node.occurences == base_node.occurences:
+            if truncated_node.occurences == base_node.occurences:
                 optimized_actions.append(action_prefix + "*")
                 break
 
