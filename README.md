@@ -20,6 +20,9 @@ python -m pip install iam-minify
 
 The script will traverse though all policy statemends defined in the policy document, and optimise IAM actions within the same statement. It processes different policy statements in isolation in order to not grant unintended access to resources.
 
+### Limitations
+- Actions in the supplied IAM policy documents can contain **wildcards only at the end of the string**. Wildcards anywhere else than at the end of the string are currently not supported. E.g., `s3:Get*` will work while `s3:*Object` **will throw an error.**
+
 ### Example
 
 Consider the following IAM policy:

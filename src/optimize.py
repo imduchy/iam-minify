@@ -1,4 +1,17 @@
+import logging
 from src.trie import Trie, TrieNode
+
+LOGGER = logging.getLogger("iam-minify")
+
+
+class UnsupportedWildcardError(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
+
+class NonExistentActionError(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
 
 
 def truncate(provided_actions: list[str], all_actions: list[str]):
@@ -14,8 +27,22 @@ def truncate(provided_actions: list[str], all_actions: list[str]):
         node: TrieNode = base_trie.root
 
         for pos, char in enumerate(action):
-            if char not in node.children:
-                raise ValueError(
+            # If the provided action contains a star (wildcard) at the end of the string, we can
+            # break from the loop and return the value as is.
+            if char == "*":
+
+                # TODO: Support wildcards in the middle of a string
+                if pos != len(action) - 1:
+                    raise UnsupportedWildcardError(
+                        f"IAM action {action} couldn't be truncated. Wildcard characters in the "
+                        f"middle of the string are not supported."
+                    )
+
+                truncated_list.append(action)
+                break
+
+            if not char in node.children:
+                raise NonExistentActionError(
                     f"IAM action {action} couldn't be truncated. Character {char} at position "
                     f"{pos} doesn't exist in the trie."
                 )
