@@ -44,8 +44,8 @@ Consider the following IAM policy:
         "s3:ListBucketVersions",
         "s3:ListJobs",
         "s3:ListMultipartUploadParts",
-        "s3:ListMultiRegionAccessPoints"
-        "s3:ListStorageLensConfigurations",
+        "s3:ListMultiRegionAccessPoints",
+        "s3:ListStorageLensConfigurations"
       ],
       "Resource": "*"
     }
